@@ -30,3 +30,21 @@ def test_services_pinned() -> None:
 
 def test_no_secrets_referenced() -> None:
     assert "secrets." not in CI.read_text()
+
+
+def _frontend_runs() -> list[str]:
+    return [s["run"] for s in _load()["jobs"]["frontend"]["steps"] if "run" in s]
+
+
+def test_frontend_job_commands() -> None:
+    runs = _frontend_runs()
+    expected = ["pnpm lint", "pnpm typecheck", "pnpm test", "pnpm build"]
+    positions = [runs.index(cmd) for cmd in expected]
+    assert positions == sorted(positions)
+    assert _load()["jobs"]["frontend"]["defaults"]["run"]["working-directory"] == "frontend"
+
+
+def test_frontend_frozen_lockfile() -> None:
+    installs = [r for r in _frontend_runs() if r.startswith("pnpm install")]
+    assert installs == ["pnpm install --frozen-lockfile"]
+    assert "pnpm install" not in _frontend_runs()
