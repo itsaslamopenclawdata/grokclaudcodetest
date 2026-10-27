@@ -9,6 +9,8 @@ dependencies = [
   "pydantic-settings==2.16.1",
   "structlog==26.1.0",
   "prometheus-fastapi-instrumentator==8.1.0",
+  "sqlalchemy[asyncio]==2.1.6",
+  "asyncpg==0.32.0",
 ]
 
 [dependency-groups]
