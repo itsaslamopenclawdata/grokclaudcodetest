@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api import health
+from app.api import auth, health
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.metrics import setup_metrics
@@ -18,6 +18,7 @@ def create_app() -> FastAPI:
     )
     app.add_middleware(RequestIdMiddleware)
     app.include_router(health.router)
+    app.include_router(auth.router)
     setup_metrics(app)
     return app
 
