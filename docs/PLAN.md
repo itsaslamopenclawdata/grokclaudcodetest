@@ -32,6 +32,7 @@ Python packages on PyPI; npm packages on the npm registry; image tags on Docker 
 | Auth | pyjwt / pwdlib[argon2] | 2.15.1 / 0.3.1 | HS256, Argon2 |
 | Ops | structlog / prometheus-fastapi-instrumentator | 26.1.0 / 8.1.0 | |
 | Tests | pytest / pytest-asyncio / httpx / asgi-lifespan | 9.1.1 / 1.4.1 / 0.28.1 / 2.1.0 | httpx `AsyncClient` does not run lifespan (Context7) |
+| Tests | PyYAML | 6.0.3 | CI workflow file test (`scripts/test_ci_workflow.py`), added by gate fix on #13 |
 | Lint | ruff / mypy | 0.17.3 / 2.4.0 | |
 | Web | next / react | 16.4.3 / 19.3 | App Router, `next.config.ts` typed `NextConfig` (Context7) |
 | Web | tailwindcss / shadcn CLI | 4.3.3 / 4.22.2 | |
