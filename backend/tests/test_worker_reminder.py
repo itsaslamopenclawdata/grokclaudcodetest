@@ -21,7 +21,7 @@ async def todo_id(test_engine: AsyncEngine) -> AsyncIterator[uuid.UUID]:
         user = User(email=f"w-{uuid.uuid4().hex[:8]}@example.com", password_hash="x")
         s.add(user)
         await s.flush()
-        todo = Todo(user_id=user.id, title="remind me")
+        todo = Todo(user_id=user.id, title="remind me", position=1)
         s.add(todo)
         await s.commit()
     yield todo.id
