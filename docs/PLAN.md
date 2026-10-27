@@ -32,6 +32,7 @@ Python packages on PyPI; npm packages on the npm registry; image tags on Docker 
 | Auth | pyjwt / pwdlib[argon2] | 2.15.1 / 0.3.1 | HS256, Argon2 |
 | Ops | structlog / prometheus-fastapi-instrumentator | 26.1.0 / 8.1.0 | |
 | Tests | pytest / pytest-asyncio / httpx / asgi-lifespan | 9.1.1 / 1.4.1 / 0.28.1 / 2.1.0 | httpx `AsyncClient` does not run lifespan (Context7) |
+| Tests | PyYAML | 6.0.3 | CI workflow file test (`scripts/test_ci_workflow.py`), added by gate fix on #13 |
 | Lint | ruff / mypy | 0.17.3 / 2.4.0 | |
 | Tooling | uv | 0.9.30 | Dockerfile `ghcr.io/astral-sh/uv:0.9.30` (#52) and CI `astral-sh/setup-uv` `version: "0.9.30"` (#13) |
 | CI tests | pyyaml | 6.0.3 | Dev/test dependency only (never a runtime dependency; not in `backend/pyproject.toml` runtime deps). Used via `uv run --with pyyaml==6.0.3` in workflow tests (#13, #51, #58). Approved by Aslam on 2026-10-27. |
