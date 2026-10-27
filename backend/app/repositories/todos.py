@@ -1,10 +1,10 @@
 import uuid
 
-from sqlalchemy import Select, func, select, tuple_
+from sqlalchemy import Select, delete, func, select, tuple_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.todo import Todo
-from app.schemas.todo import TodoCreate
+from app.schemas.todo import TodoCreate, TodoUpdate
 
 POSITION_STEP = 1024.0
 
@@ -44,3 +44,33 @@ async def list_todos(
         rows = rows[:limit]
         return rows, (rows[-1].position, rows[-1].id)
     return rows, None
+
+
+async def get_todo(session: AsyncSession, user_id: uuid.UUID, todo_id: uuid.UUID) -> Todo | None:
+    result = await session.scalars(select(Todo).where(Todo.id == todo_id, Todo.user_id == user_id))
+    return result.one_or_none()
+
+
+async def update_todo(
+    session: AsyncSession, user_id: uuid.UUID, todo_id: uuid.UUID, data: TodoUpdate
+) -> Todo | None:
+    todo = await get_todo(session, user_id, todo_id)
+    if todo is None:
+        return None
+    changes = data.model_dump(exclude_unset=True)
+    for field, value in changes.items():
+        setattr(todo, field, value)
+    if "remind_at" in changes:
+        todo.reminded_at = None
+    await session.commit()
+    await session.refresh(todo)
+    return todo
+
+
+async def delete_todo(session: AsyncSession, user_id: uuid.UUID, todo_id: uuid.UUID) -> bool:
+    result = await session.execute(
+        delete(Todo).where(Todo.id == todo_id, Todo.user_id == user_id).returning(Todo.id)
+    )
+    deleted = result.scalar_one_or_none() is not None
+    await session.commit()
+    return deleted
