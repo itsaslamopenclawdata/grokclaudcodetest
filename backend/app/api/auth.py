@@ -3,6 +3,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, Response
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.deps import CurrentUser
 from app.core.config import Settings, get_settings
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.session import get_session
@@ -64,3 +65,8 @@ async def login(
 @router.post("/logout", status_code=204)
 async def logout(response: Response) -> None:
     response.delete_cookie("access_token", path="/")
+
+
+@router.get("/me", response_model=UserOut, status_code=200)
+async def me(user: CurrentUser) -> User:
+    return user
