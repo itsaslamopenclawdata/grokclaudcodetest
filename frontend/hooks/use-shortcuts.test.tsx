@@ -2,7 +2,7 @@ import { fireEvent, render, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { isTypingTarget, useShortcuts } from "./use-shortcuts";
 
-const press = (key: string, init: KeyboardEventInit = {}, target: EventTarget = window) =>
+const press = (key: string, init: KeyboardEventInit = {}, target: Element | Window = window) =>
   fireEvent.keyDown(target, { key, bubbles: true, ...init });
 
 describe("useShortcuts", () => {
