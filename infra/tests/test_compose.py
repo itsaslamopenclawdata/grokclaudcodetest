@@ -30,3 +30,11 @@ def test_no_latest_tags() -> None:
         image = svc["image"]
         assert ":" in image, name
         assert not image.endswith(":latest"), name
+
+
+def test_redis_image_pinned() -> None:
+    assert compose_config()["services"]["redis"]["image"] == "redis:8.8.4-alpine"
+
+
+def test_redis_eviction_only_volatile() -> None:
+    assert "volatile-lru" in compose_config()["services"]["redis"]["command"]
