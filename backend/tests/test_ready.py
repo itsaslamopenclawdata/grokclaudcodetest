@@ -1,35 +1,12 @@
 import os
-from collections.abc import AsyncIterator
 
 import httpx
-import pytest
-from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.cache.redis import create_redis, get_redis
-from app.core.config import get_settings
-from app.db.session import get_session
-from app.main import create_app
 
 TEST_REDIS_URL = os.environ.get("TEST_REDIS_URL", "redis://localhost:6379/15")
-
-
-@pytest.fixture
-async def app(db_session: AsyncSession, monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[FastAPI]:
-    monkeypatch.setenv("REDIS_URL", TEST_REDIS_URL)
-    monkeypatch.setenv("RATE_LIMIT_REDIS_URL", TEST_REDIS_URL)
-    get_settings.cache_clear()
-    application = create_app()
-
-    async def _session() -> AsyncIterator[AsyncSession]:
-        yield db_session
-
-    application.dependency_overrides[get_session] = _session
-    async with LifespanManager(application):
-        yield application
-    get_settings.cache_clear()
 
 
 async def _get(app: FastAPI, path: str) -> httpx.Response:
