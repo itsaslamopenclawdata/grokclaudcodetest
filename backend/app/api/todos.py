@@ -1,4 +1,5 @@
-from typing import Annotated
+import uuid
+from typing import Annotated, Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -7,8 +8,8 @@ from app.api.deps import CurrentUser
 from app.core.cursor import CursorError, decode_cursor, encode_cursor
 from app.db.session import get_session
 from app.models.todo import Todo
-from app.repositories.todos import create_todo, list_todos
-from app.schemas.todo import TodoCreate, TodoOut, TodoPage
+from app.repositories.todos import create_todo, delete_todo, list_todos, update_todo
+from app.schemas.todo import TodoCreate, TodoOut, TodoPage, TodoUpdate
 
 router = APIRouter(prefix="/api/v1/todos", tags=["todos"])
 
@@ -38,3 +39,22 @@ async def list_(
 @router.post("", response_model=TodoOut, status_code=201)
 async def create(body: TodoCreate, user: CurrentUser, session: SessionDep) -> Todo:
     return await create_todo(session, user.id, body)
+
+
+NOT_FOUND: dict[int | str, dict[str, Any]] = {404: {"description": "todo not found"}}
+
+
+@router.patch("/{todo_id}", response_model=TodoOut, responses=NOT_FOUND)
+async def update(
+    todo_id: uuid.UUID, body: TodoUpdate, user: CurrentUser, session: SessionDep
+) -> Todo:
+    todo = await update_todo(session, user.id, todo_id, body)
+    if todo is None:
+        raise HTTPException(status_code=404, detail="todo not found")
+    return todo
+
+
+@router.delete("/{todo_id}", status_code=204, responses=NOT_FOUND)
+async def delete(todo_id: uuid.UUID, user: CurrentUser, session: SessionDep) -> None:
+    if not await delete_todo(session, user.id, todo_id):
+        raise HTTPException(status_code=404, detail="todo not found")
