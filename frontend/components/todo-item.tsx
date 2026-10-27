@@ -14,20 +14,34 @@ export function TodoItem({
   onToggle,
   onDelete,
   dragHandle,
+  sortable,
 }: {
   todo: Todo;
   selected?: boolean;
   onToggle: (id: string, done: boolean) => void;
   onDelete: (id: string) => void;
   dragHandle?: React.ReactNode;
+  /** Wiring from TodoList's useSortable; dnd-kit owns the transform while sorting. */
+  sortable?: {
+    ref: (el: HTMLElement | null) => void;
+    style?: React.CSSProperties;
+    dragging?: boolean;
+    sorting?: boolean;
+  };
 }) {
   const reduce = useReducedMotion() ?? false;
   const done = todo.is_done;
   const pending = todo.id.startsWith("tmp-");
 
   return (
-    <li
-      role="option"
+    <motion.li
+      ref={sortable?.ref}
+      style={sortable?.style}
+      layout={reduce || sortable?.sorting ? false : "position"}
+      initial={reduce ? false : { opacity: 0, y: -4 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={reduce ? { opacity: 0, transition: { duration: 0 } } : { opacity: 0, x: -12 }}
+      transition={reduce ? { duration: 0 } : { ...spring, opacity: { duration: 0.15 } }}
       aria-selected={selected}
       data-id={todo.id}
       className={cn(
@@ -35,6 +49,7 @@ export function TodoItem({
         "hover:bg-foreground/[0.03]",
         selected && "bg-accent/[0.07] ring-1 ring-accent/30",
         pending && "opacity-70",
+        sortable?.dragging && "z-10 bg-surface shadow-lg ring-1 ring-border",
       )}
     >
       {dragHandle}
@@ -85,6 +100,6 @@ export function TodoItem({
       >
         <X aria-hidden />
       </Button>
-    </li>
+    </motion.li>
   );
 }
