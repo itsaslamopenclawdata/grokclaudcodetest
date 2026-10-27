@@ -9,7 +9,7 @@ from alembic.util.exc import CommandError
 
 def test_script_directory_loads() -> None:
     script = ScriptDirectory.from_config(Config("alembic.ini"))
-    assert script.get_heads() == []
+    assert script.get_heads() == ["0001"]
 
 
 def test_env_targets_base_metadata() -> None:

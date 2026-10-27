@@ -20,7 +20,7 @@ jobs:
           --health-cmd "redis-cli ping" --health-interval 5s --health-timeout 3s --health-retries 10
     env:
       TEST_DATABASE_URL: postgresql+asyncpg://todo:todo@localhost:5432/todo_test
-      MIGRATE_DATABASE_URL: postgresql+asyncpg://todo:todo@localhost:5432/todo_test
+      MIGRATE_DATABASE_URL: postgresql+asyncpg://todo:todo@localhost:5432/todo_migrate
       TEST_REDIS_URL: redis://localhost:6379/15
     defaults:
       run:
@@ -28,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
+      - run: PGPASSWORD=todo psql -h localhost -U todo -d todo_test -c 'CREATE DATABASE todo_migrate'
       - run: uv sync --locked
       - run: uv run ruff check .
       - run: uv run ruff format --check .
