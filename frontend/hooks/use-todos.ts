@@ -8,7 +8,7 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { api } from "@/lib/api";
+import { ApiError, api } from "@/lib/api";
 import type { Todo, TodoCreate, TodoPage, TodoUpdate } from "@/lib/types";
 
 export const todosKey = ["todos"] as const;
@@ -27,6 +27,8 @@ export function useTodos() {
     queryFn: ({ pageParam }) => api.listTodos(pageParam),
     initialPageParam: null as string | null,
     getNextPageParam: (p: TodoPage) => p.next_cursor,
+    // A 401 will not fix itself; fail fast so the screen can redirect to /login.
+    retry: (count, err) => !(err instanceof ApiError && err.status === 401) && count < 1,
   });
 }
 
