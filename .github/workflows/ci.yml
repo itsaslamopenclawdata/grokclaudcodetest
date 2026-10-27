@@ -28,7 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: astral-sh/setup-uv@v6
-      - run: PGPASSWORD=todo psql -h localhost -U todo -d todo_test -c 'CREATE DATABASE todo_migrate'
+        with:
+          python-version: "3.13"
+      - run: PGPASSWORD=todo psql -h localhost -U todo -d todo_test -c 'CREATE DATABASE todo' -c 'CREATE DATABASE todo_migrate'
       - run: uv sync --locked
       - run: uv run ruff check .
       - run: uv run ruff format --check .
