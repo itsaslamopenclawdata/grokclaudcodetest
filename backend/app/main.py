@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api import health
 from app.core.config import get_settings
 from app.core.logging import configure_logging
 from app.core.request_id import RequestIdMiddleware
@@ -15,6 +16,7 @@ def create_app() -> FastAPI:
         openapi_url="/api/openapi.json",
     )
     app.add_middleware(RequestIdMiddleware)
+    app.include_router(health.router)
     return app
 
 
