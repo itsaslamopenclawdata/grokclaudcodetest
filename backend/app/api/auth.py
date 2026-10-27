@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.deps import CurrentUser
 from app.core.config import Settings, get_settings
+from app.core.ratelimit import limit_login
 from app.core.security import create_access_token, hash_password, verify_password
 from app.db.session import get_session
 from app.models.user import User
@@ -37,7 +38,11 @@ async def register(body: RegisterIn, session: SessionDep) -> User:
     "/login",
     response_model=TokenOut,
     status_code=200,
-    responses={401: {"description": "invalid credentials"}},
+    responses={
+        401: {"description": "invalid credentials"},
+        429: {"description": "rate limit exceeded"},
+    },
+    dependencies=[Depends(limit_login)],
 )
 async def login(
     body: LoginIn, response: Response, session: SessionDep, settings: SettingsDep

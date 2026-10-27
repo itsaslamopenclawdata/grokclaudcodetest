@@ -12,12 +12,18 @@ from app.cache.redis import get_redis
 from app.cache.todo_cache import bump_version, get_page, set_page
 from app.core.config import Settings, get_settings
 from app.core.cursor import CursorError, decode_cursor, encode_cursor
+from app.core.ratelimit import limit_todos
 from app.db.session import get_session
 from app.models.todo import Todo
 from app.repositories.todos import create_todo, delete_todo, list_todos, update_todo
 from app.schemas.todo import TodoCreate, TodoOut, TodoPage, TodoUpdate
 
-router = APIRouter(prefix="/api/v1/todos", tags=["todos"])
+router = APIRouter(
+    prefix="/api/v1/todos",
+    tags=["todos"],
+    dependencies=[Depends(limit_todos)],
+    responses={429: {"description": "rate limit exceeded"}},
+)
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
 RedisDep = Annotated[Redis, Depends(get_redis)]
