@@ -34,7 +34,7 @@ Python packages on PyPI; npm packages on the npm registry; image tags on Docker 
 | Tests | pytest / pytest-asyncio / httpx / asgi-lifespan | 9.1.1 / 1.4.1 / 0.28.1 / 2.1.0 | httpx `AsyncClient` does not run lifespan (Context7) |
 | Lint | ruff / mypy | 0.17.3 / 2.4.0 | |
 | Tooling | uv | 0.9.30 | Dockerfile `ghcr.io/astral-sh/uv:0.9.30` (#52) and CI `astral-sh/setup-uv` `version: "0.9.30"` (#13) |
-| CI tests | pyyaml | 6.0.3 | `uv run --with pyyaml==6.0.3` in workflow tests (#13, #51, #58) |
+| CI tests | pyyaml | 6.0.3 | Dev/test dependency only (never a runtime dependency; not in `backend/pyproject.toml` runtime deps). Used via `uv run --with pyyaml==6.0.3` in workflow tests (#13, #51, #58). Approved by Aslam on 2026-10-27. |
 | Web | next / react | 16.4.3 / 19.3 | App Router, `next.config.ts` typed `NextConfig` (Context7) |
 | Web | tailwindcss / shadcn CLI | 4.3.3 / 4.22.2 | |
 | Web | @tanstack/react-query | 5.105.0 | optimistic updates via `onMutate` / `onError` rollback |
