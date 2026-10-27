@@ -1,5 +1,6 @@
 import asyncio
 import uuid
+from datetime import UTC, datetime
 
 import structlog
 from celery import Task
@@ -42,3 +43,29 @@ def send_reminder(self: Task, todo_id: str) -> bool:
     if sent:
         log.info("reminder.sent", todo_id=todo_id)
     return sent
+
+
+_DUE = text(
+    "SELECT id FROM todos WHERE reminded_at IS NULL AND remind_at IS NOT NULL"
+    " AND remind_at <= :now ORDER BY remind_at LIMIT :limit"
+)
+
+
+async def due_ids(database_url: str, now: datetime, limit: int = 500) -> list[uuid.UUID]:
+    """Due, unreminded todos (served by ix_todos_remind_pending)."""
+    engine = create_async_engine(database_url, poolclass=NullPool)
+    try:
+        async with engine.connect() as conn:
+            rows = (await conn.execute(_DUE, {"now": now, "limit": limit})).scalars().all()
+    finally:
+        await engine.dispose()
+    return list(rows)
+
+
+@celery_app.task(name="todos.scan_due_reminders")  # type: ignore[untyped-decorator]
+def scan_due_reminders() -> int:
+    ids = asyncio.run(due_ids(get_settings().database_url, datetime.now(UTC)))
+    for todo_id in ids:
+        send_reminder.delay(str(todo_id))
+    log.info("reminder.scan", enqueued=len(ids))
+    return len(ids)
