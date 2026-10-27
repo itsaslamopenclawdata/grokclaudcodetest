@@ -11,6 +11,7 @@ dependencies = [
   "prometheus-fastapi-instrumentator==8.1.0",
   "sqlalchemy[asyncio]==2.1.6",
   "asyncpg==0.32.0",
+  "alembic==1.20.1",
 ]
 
 [dependency-groups]
@@ -35,6 +36,9 @@ target-version = "py313"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "ASYNC"]
+
+[tool.ruff.lint.isort]
+known-third-party = ["alembic"]
 
 [tool.mypy]
 strict = true
