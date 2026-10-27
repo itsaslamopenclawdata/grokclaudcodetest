@@ -9,8 +9,9 @@ async def test_insert_and_read_user(db_session: AsyncSession) -> None:
     user = User(email="a@example.com", password_hash="x")
     db_session.add(user)
     await db_session.flush()
+    user_id = user.id
     db_session.expire_all()
-    got = await db_session.get(User, user.id)
+    got = await db_session.get(User, user_id)
     assert got is not None
     assert got.email == "a@example.com"
     assert got.created_at is not None
