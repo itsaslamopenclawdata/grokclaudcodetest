@@ -4,7 +4,7 @@ import subprocess
 from collections.abc import Callable
 from typing import Any
 
-from sqlalchemy import Connection, inspect
+from sqlalchemy import Connection, inspect, text
 from sqlalchemy.ext.asyncio import create_async_engine
 
 MIGRATE_DATABASE_URL = os.environ.get(
@@ -52,3 +52,33 @@ def test_cycle() -> None:
     alembic("upgrade", "head")
     alembic("downgrade", "-1")
     alembic("upgrade", "head")
+
+
+def _todos_indexes() -> dict[str, str]:
+    async def _run() -> dict[str, str]:
+        eng = create_async_engine(MIGRATE_DATABASE_URL)
+        try:
+            async with eng.connect() as conn:
+                rows = await conn.execute(
+                    text("SELECT indexname, indexdef FROM pg_indexes WHERE tablename = 'todos'")
+                )
+                return {r[0]: r[1] for r in rows}
+        finally:
+            await eng.dispose()
+
+    return asyncio.run(_run())
+
+
+def test_upgrade_creates_todos_indexes() -> None:
+    alembic("upgrade", "head")
+    idx = _todos_indexes()
+    assert "ix_todos_user_id_position_id" in idx
+    assert "ix_todos_remind_pending" in idx
+    assert "WHERE" in idx["ix_todos_remind_pending"]
+
+
+def test_downgrade_0001_drops_todos() -> None:
+    alembic("upgrade", "head")
+    alembic("downgrade", "0001")
+    assert not inspect_db(lambda i: i.has_table("todos"))
+    assert inspect_db(lambda i: i.has_table("users"))
